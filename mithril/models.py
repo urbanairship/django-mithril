@@ -1,4 +1,5 @@
 from django.db import models
+import netaddr
 
 class Whitelist(models.Model):
     name = models.CharField(max_length=255)
@@ -8,14 +9,13 @@ class Whitelist(models.Model):
         return u'%s' % self.name
 
     def okay(self, ip):
-        pass
+        cidrs = ['%s/%d' % _range for _range in self.range_set.values_list('ip', 'cidr')] 
+        return len(netaddr.all_matching_cidrs(ip, cidrs)) > 0
 
 class Range(models.Model):
+    whitelist = models.ForeignKey(WhiteList)
     ip = models.IPAddressField()
     cidr = models.PositiveSmallIntegerField(default=32)
 
     def __unicode__(self):
         return u'%s/%d' % (self.ip, self.cidr)
-
-    def okay(self, ip):
-        pass
