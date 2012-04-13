@@ -32,7 +32,7 @@ class IPWhitelistMiddleware(object):
             if ip is not None:
                 return ip
 
-    def ip_in_whitelist(self, ip, whitelists):
+    def ip_in_whitelists(self, ip, whitelists):
         return self.behavior(lambda r : self.ip_in_whitelist(ip, r), whitelists)
 
     def ip_in_whitelist(self, ip, whitelist):
@@ -45,7 +45,7 @@ class IPWhitelistMiddleware(object):
         whitelists = []
         for lookup in whitelist_to_user_lookups:
             whitelists.append(
-                Whitelist.objects.filter(**{
+                whitelist_to_user_lookups.objects.filter(**{
                     lookup:user
                 })[:]
             )
