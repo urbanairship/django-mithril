@@ -1,4 +1,6 @@
 from django.conf import settings
+from django.http import HttpResponseForbidden
+
 
 __all__ = ( 
     'IPWhitelistAllMiddleware',
@@ -19,8 +21,10 @@ MITHRIL_WHITELIST_IP_HEADER = (
     'REMOTE_ADDR'
 )
 
+
 class IPWhitelistMiddleware(object):
-    
+    """Match incoming user against whitelists for any company/organization."""
+
     # default behavior is that an ip must pass
     # "all" whitelists to be applicable
     behavior = all
@@ -33,7 +37,8 @@ class IPWhitelistMiddleware(object):
                 return ip
 
     def ip_in_whitelists(self, ip, whitelists):
-        return self.behavior(lambda r : self.ip_in_whitelist(ip, r), whitelists)
+        return self.behavior(
+                lambda r : self.ip_in_whitelist(ip, r), whitelists)
 
     def ip_in_whitelist(self, ip, whitelist):
         return whitelist.okay(ip)
@@ -62,10 +67,23 @@ class IPWhitelistMiddleware(object):
             return None  
 
     def whitelist(self, ip, is_valid, whitelists):
-        return None
+        """Return 403 if user doesn't match criteria.
+
+        Returns:
+            HttpResponseForbidden if user is subject to whitelist, and None 
+            otherwise.
+        """
+        if not is_valid:
+            return HttpResponseForbidden(
+            ('You are accessing this account from an IP '
+            'outside the configured ranges'))
+        else:
+            return None
+
 
 class IPWhitelistAllMiddleware(IPWhitelistMiddleware):
-    pass
+    behavior = all
+
 
 class IPWhitelistAnyMiddleware(IPWhitelistMiddleware):
 
