@@ -9,8 +9,8 @@ class Strategy(object):
 
     def get_ip_from_request(self, request):
         for header in self.request_ip_headers:
-            if request.get(header, None) is not None:
-                return request[header]
+            if request.META.get(header, None) is not None:
+                return request.META[header]
         return None
 
     def process_view(self, request, view, *args, **kwargs):
@@ -29,7 +29,7 @@ class Strategy(object):
                 return self.whitelist_ip(ip, whitelists)
 
     def whitelist_ip(self, ip, whitelists):
-        okay = self.validate_whitelists(lambda w: w.okay(ip), whitelists)
+        okay = self.validate_whitelists(map(lambda w: w.okay(ip), whitelists))
 
         if not okay:
             return self.forbidden_response_class()
@@ -50,7 +50,7 @@ class Strategy(object):
                         # portion of the middleware cycle.
                         ip = get_ip()
  
-                        if cls.validate_whitelists(lambda w: w.okay(ip), whitelists):
+                        if cls.validate_whitelists(map(lambda w: w.okay(ip), whitelists)):
                             return user
 
         return MithrilBackend
