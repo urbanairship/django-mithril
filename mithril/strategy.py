@@ -53,4 +53,19 @@ class Strategy(object):
                         if cls.validate_whitelists(map(lambda w: w.okay(ip), whitelists)):
                             return user
 
+            # NB: Sometimes the cure is worse than the cold.
+            # Django does some pretty "awesome" stuff to try and determine
+            # which auth backend loaded a user. In this case, we only care
+            # about new logins, so we make this generated class masquerade
+            # as the class it's extending.
+            #
+            # That is to say: I am so, so sorry. 
+            @property
+            def __module__(self):
+                return base_backend.__module__
+    
+            @property
+            def __class__(self):
+                return base_backend
+
         return MithrilBackend
