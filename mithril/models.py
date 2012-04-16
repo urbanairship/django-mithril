@@ -13,7 +13,7 @@ class Whitelist(models.Model):
         return len(netaddr.all_matching_cidrs(ip, cidrs)) > 0
 
 class Range(models.Model):
-    whitelist = models.ForeignKey(WhiteList)
+    whitelist = models.ForeignKey(Whitelist)
     ip = models.IPAddressField()
     cidr = models.PositiveSmallIntegerField(default=32)
 
