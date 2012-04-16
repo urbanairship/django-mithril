@@ -1,92 +1,23 @@
 from django.conf import settings
-from django.http import HttpResponseForbidden
+from mithril import set_current_ip
 
+class WhitelistMiddleware(object):
+    def get_strategy(self, django_settings=settings):
+        return getattr(django_settings, 'MITHRIL_STRATEGY', None)()
 
-__all__ = ( 
-    'IPWhitelistAllMiddleware',
-    'IPWhitelistAnyMiddleware',
-)
-
-LOOKUPS_SETTING = 'MITHRIL_WHITELIST_TO_USER_LOOKUPS' 
-HEADERS_SETTING = 'MITHRIL_WHITELIST_IP_HEADER'
-
-MITHRIL_WHITELIST_TO_USER_LOOKUPS = (
-    'company__granted_perm__user',
-    'company__admins__user',
-)
-
-MITHRIL_WHITELIST_IP_HEADER = (
-    'HTTP_TRUE_IP',
-    'HTTP_X_FORWARDED_FOR',
-    'REMOTE_ADDR'
-)
-
-
-class IPWhitelistMiddleware(object):
-    """Match incoming user against whitelists for any company/organization."""
-
-    # default behavior is that an ip must pass
-    # "all" whitelists to be applicable
-    behavior = all
-
-    def ip_from_request(request):
-        headers = getattr(settings, HEADERS_SETTING, [])
-        for header_name in headers:
-            ip = request.META.get(header_name, None)
-            if ip is not None:
-                return ip
-
-    def ip_in_whitelists(self, ip, whitelists):
-        return self.behavior(
-                lambda r : self.ip_in_whitelist(ip, r), whitelists)
-
-    def ip_in_whitelist(self, ip, whitelist):
-        return whitelist.okay(ip)
-
-    def get_applicable_whitelists(self, request):
-        user = request.user
-        whitelist_to_user_lookups = getattr(settings, LOOKUPS_SETTING, [])
-
-        whitelists = []
-        for lookup in whitelist_to_user_lookups:
-            whitelists.append(
-                whitelist_to_user_lookups.objects.filter(**{
-                    lookup:user
-                })[:]
-            )
-
-        return whitelists
-
-    def process_request(self, request, *args, **kwargs):
+    def process_request(self, request):
         try:
-            whitelists = self.get_applicable_whitelists(request)
-            ip = self.ip_from_request(request)
-            is_valid_ip = self.ip_in_whitelists(ip, whitelists)
-            return self.whitelist(ip, is_valid_ip, whitelists)
-        except AttributeError:
-            return None  
+            strategy = self.get_strategy()
+            set_current_ip(strategy.get_ip_from_request(request))
+        except TypeError:
+            pass
 
-    def whitelist(self, ip, is_valid, whitelists):
-        """Return 403 if user doesn't match criteria.
-
-        Returns:
-            HttpResponseForbidden if user is subject to whitelist, and None 
-            otherwise.
-        """
-        if not is_valid:
-            return HttpResponseForbidden(
-            ('You are accessing this account from an IP '
-            'outside the configured ranges'))
-        else:
+    def process_view(self, request, view, *args, **kwargs):
+        if getattr(view, 'mithril_exempt'):
             return None
 
-
-class IPWhitelistAllMiddleware(IPWhitelistMiddleware):
-    behavior = all
-
-
-class IPWhitelistAnyMiddleware(IPWhitelistMiddleware):
-
-    # if it passes any whitelist, it's valid.
-    behavior = any
-
+        try:
+            strategy = self.get_strategy()
+            return strategy.process_view(request, view, *args, **kwargs)
+        except TypeError:
+            pass
