@@ -1,4 +1,5 @@
 from django.http import HttpResponseForbidden 
+from django.utils.functional import curry
 from mithril.models import Whitelist
 import mithril
 
@@ -6,6 +7,12 @@ class Strategy(object):
     validate_whitelists = all
     forbidden_response_class = HttpResponseForbidden
     model = Whitelist
+
+    actions = []
+    partial_credential_lookup = []
+    request_ip_headers = (
+        'REMOTE_ADDR',
+    )
 
     def get_ip_from_request(self, request):
         for header in self.request_ip_headers:
@@ -26,13 +33,24 @@ class Strategy(object):
                 if not len(whitelists):
                     continue
 
-                return self.whitelist_ip(ip, whitelists)
+                response_fn = getattr(view, 'mithril_reset', None)
+                if response_fn is None:
+                    response_fn = self.forbidden_response_class
+                else:
+                    response_fn = curry(response_fn, args=(
+                        request,
+                        view,
+                        args,
+                        kwargs
+                    ))
 
-    def whitelist_ip(self, ip, whitelists):
+                return self.whitelist_ip(ip, whitelists, response_fn)
+
+    def whitelist_ip(self, ip, whitelists, response_fn):
         okay = self.validate_whitelists(map(lambda w: w.okay(ip), whitelists))
 
         if not okay:
-            return self.forbidden_response_class()
+            return response_fn()
 
     @classmethod
     def get_authentication_backend(cls, base_backend, get_ip=mithril.get_current_ip):
