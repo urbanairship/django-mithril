@@ -33,6 +33,7 @@ setup(
     include_package_data=True,
     install_requires=required,
     license=open("LICENSE").read(),
+    zip_safe=False,
     classifiers=(
         'Development Status :: 1 - Alpha',
         'Intended Audience :: Developers',
