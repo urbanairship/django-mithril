@@ -69,6 +69,7 @@ class Strategy(object):
                             user=request.user,
                             url=url,
                             ip=ip,
+                            whitelists=whitelists,
                         )
                         return response
                     
@@ -107,7 +108,8 @@ class Strategy(object):
                             cls.login_signal.send(
                                 sender=self,
                                 partial_credentials=val,
-                                ip=ip
+                                ip=ip,
+                                whitelists=whitelists,
                             )
          
             # NB: Sometimes the cure is worse than the cold.
