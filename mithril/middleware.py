@@ -7,12 +7,15 @@ class WhitelistMiddleware(object):
         lhs, rhs = getattr(django_settings, 'MITHRIL_STRATEGY').rsplit('.', 1)
         return getattr(import_module(lhs), rhs)() 
 
-    def process_request(self, request):
+    def process_request(self, request, set_ip=set_current_ip):
+        # no matter what, clear the current IP.
+        set_ip(None)
         try:
             strategy = self.get_strategy()
-            set_current_ip(strategy.get_ip_from_request(request))
         except AttributeError:
             pass
+        else:
+            set_ip(strategy.get_ip_from_request(request))
 
     def process_view(self, request, view, view_args, view_kwargs):
         if getattr(view, 'mithril_exempt', None):
@@ -20,6 +23,7 @@ class WhitelistMiddleware(object):
 
         try:
             strategy = self.get_strategy()
-            return strategy.process_view(request, view, *view_args, **view_kwargs)
         except AttributeError:
             pass
+        else:
+            return strategy.process_view(request, view, *view_args, **view_kwargs)

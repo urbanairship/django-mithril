@@ -2,7 +2,7 @@ import functools
 
 def exempt(view):
     @functools.wraps(view)
-    def inner(request, *args, **kwargs):
+    def inner(*args, **kwargs):
         return view(*args, **kwargs)
 
     inner.mithril_exempt = True

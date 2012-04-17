@@ -1,5 +1,6 @@
 from django.http import HttpResponseForbidden 
 from django.utils.functional import curry
+from django.core.exceptions import FieldError
 from mithril.models import Whitelist
 import mithril
 
@@ -29,25 +30,30 @@ class Strategy(object):
                 if value is None:
                     continue
 
-                whitelists = self.model.objects.filter(**{lookup:value})
-                if not len(whitelists):
+                try:
+                    whitelists = self.model.objects.filter(**{lookup:value})
+                    if not len(whitelists):
+                        continue
+                except FieldError:
                     continue
-
-                response_fn = getattr(view, 'mithril_reset', None)
-                if response_fn is None:
-                    response_fn = self.forbidden_response_class
                 else:
-                    response_fn = curry(response_fn, args=(
-                        request,
-                        view,
-                        args,
-                        kwargs
-                    ))
+                    response_fn = getattr(view, 'mithril_reset', None)
+                    if response_fn is None:
+                        response_fn = self.forbidden_response_class
+                    else:
+                        response_fn = curry(response_fn,
+                            request,
+                            view,
+                            args,
+                            kwargs
+                        )
 
-                return self.whitelist_ip(ip, whitelists, response_fn)
+                    return self.whitelist_ip(ip, whitelists, response_fn)
 
     def whitelist_ip(self, ip, whitelists, response_fn):
-        okay = self.validate_whitelists(map(lambda w: w.okay(ip), whitelists))
+        okay = False
+        if ip is not None:
+            okay = self.validate_whitelists(map(lambda w: w.okay(ip), whitelists))
 
         if not okay:
             return response_fn()
@@ -57,9 +63,13 @@ class Strategy(object):
         class MithrilBackend(base_backend):
             def authenticate(self, **kwargs):
                 user = super(MithrilBackend, self).authenticate(**kwargs)
+
+                if not cls.partial_credential_lookup:
+                    return user
+
                 for key, lookup in cls.partial_credential_lookup:
                     val = kwargs.get(key, None)
-                    if val:
+                    if val is not None:
                         whitelists = cls.model.objects.filter(**{lookup:val})
 
                         # XXX: this is a hack to get the current
@@ -70,7 +80,7 @@ class Strategy(object):
  
                         if cls.validate_whitelists(map(lambda w: w.okay(ip), whitelists)):
                             return user
-
+                
             # NB: Sometimes the cure is worse than the cold.
             # Django does some pretty "awesome" stuff to try and determine
             # which auth backend loaded a user. In this case, we only care

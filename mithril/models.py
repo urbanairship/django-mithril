@@ -8,9 +8,9 @@ class Whitelist(models.Model):
     def __unicode__(self):
         return u'%s' % self.name
 
-    def okay(self, ip):
+    def okay(self, ip, validate=netaddr.all_matching_cidrs):
         cidrs = ['%s/%d' % _range for _range in self.range_set.values_list('ip', 'cidr')] 
-        return len(netaddr.all_matching_cidrs(ip, cidrs)) > 0
+        return len(validate(ip, cidrs)) > 0
 
 class Range(models.Model):
     whitelist = models.ForeignKey(Whitelist)
