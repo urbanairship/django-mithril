@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.http import HttpResponseForbidden 
 from django.test import TestCase
 from mithril.models import Whitelist, Range
@@ -6,10 +7,16 @@ from mithril.tests.utils import fmt_ip
 import random
 import mithril
 
+USER_COUNT = 0
+
 class StrategyTestCase(TestCase):
     def fake_request(self, expect):
+        global USER_COUNT
+
+        USER_COUNT += 1
         return type('Req', (object,), {
-            'META':{'REMOTE_ADDR':expect, 'LOL':0}
+            'META':{'REMOTE_ADDR':expect, 'LOL':0},
+            'user':User.objects.create_user('random-%d'%USER_COUNT)
         })()
 
     def test_get_ip_from_request(self):

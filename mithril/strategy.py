@@ -1,13 +1,18 @@
 from django.http import HttpResponseForbidden 
 from django.utils.functional import curry
 from django.core.exceptions import FieldError
+from django.core.urlresolvers import NoReverseMatch, reverse
 from mithril.models import Whitelist
+from mithril.signals import user_view_failed, user_login_failed
 import mithril
 
 class Strategy(object):
     validate_whitelists = all
     forbidden_response_class = HttpResponseForbidden
     model = Whitelist
+
+    view_signal = user_view_failed
+    login_signal = user_login_failed
 
     actions = []
     partial_credential_lookup = []
@@ -48,8 +53,25 @@ class Strategy(object):
                             kwargs
                         )
 
-                    return self.whitelist_ip(ip, whitelists, response_fn)
-
+                    response = self.whitelist_ip(ip, whitelists, response_fn)
+                    if response is not None:
+                        try:
+                            url = reverse(
+                                view,
+                                args=args,
+                                kwargs=kwargs
+                            )   
+                        except NoReverseMatch:
+                            url = None
+ 
+                        self.view_signal.send(
+                            sender=self,
+                            user=request.user,
+                            url=url,
+                            ip=ip,
+                        )
+                        return response
+                    
     def whitelist_ip(self, ip, whitelists, response_fn):
         okay = False
         if ip is not None:
@@ -80,7 +102,14 @@ class Strategy(object):
  
                         if cls.validate_whitelists(map(lambda w: w.okay(ip), whitelists)):
                             return user
-                
+                        else:
+                            # that user shouldn't login!
+                            cls.login_signal.send(
+                                sender=self,
+                                partial_credentials=val,
+                                ip=ip
+                            )
+         
             # NB: Sometimes the cure is worse than the cold.
             # Django does some pretty "awesome" stuff to try and determine
             # which auth backend loaded a user. In this case, we only care
