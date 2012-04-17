@@ -1,3 +1,5 @@
+__version__ = (0, 0, 1)
+
 class RequestIPStorage(object):
     def __init__(self):
         self.ip = None
