@@ -11,6 +11,9 @@ class RangeForm(forms.Form):
     def clean(self):
         ret_value = super(RangeForm, self).clean()
 
+        if 'ip' not in self.cleaned_data or 'cidr' not in self.cleaned_data:
+            return
+
         ip_cidr = '%s/%s' % (self.cleaned_data['ip'], self.cleaned_data['cidr'])
 
         try:
@@ -30,7 +33,9 @@ class WhitelistForm(forms.Form):
 
     def __init__(self, current_ip, whitelist=None, *args, **kwargs):
         self.whitelist = whitelist
-        formset_class = self.build_formset_class()
+        formset_class = self.build_formset_class(
+            kwargs.pop('range_form_class', None) or self.range_form_class
+        )
 
         extend_initial = {'current_ip':current_ip}
         if self.whitelist:
@@ -42,8 +47,8 @@ class WhitelistForm(forms.Form):
 
         super(WhitelistForm, self).__init__(*args, **kwargs)
 
-    def build_formset_class(self):
-        return formset_factory(self.range_form_class, extra=1, can_delete=True)
+    def build_formset_class(self, base_class):
+        return formset_factory(base_class, extra=0, can_delete=True)
     
     def build_formset(self, formset_class, *args, **kwargs):
         formset_kwargs = {}
