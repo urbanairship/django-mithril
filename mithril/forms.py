@@ -62,11 +62,16 @@ class WhitelistForm(forms.Form):
         return retval
 
     def save(self):
+        data = {
+            'name':self.cleaned_data['name'],
+            'slug':self.cleaned_data['slug'],
+        }
+
         if not self.whitelist:
-            self.whitelist = self.whitelist_class(**self.cleaned_data)
+            self.whitelist = self.whitelist_class(**data)
             self.whitelist.save()
         else:
-            type(self.whitelist).objects.filter(pk=self.whitelist.pk).update(**self.cleaned_data)
+            type(self.whitelist).objects.filter(pk=self.whitelist.pk).update(**data)
 
         self.whitelist.range_set.all().delete()
         
