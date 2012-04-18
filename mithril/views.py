@@ -14,7 +14,7 @@ class WhitelistEditor(object):
     def __call__(self, request, whitelist_pk=None, *args, **kwargs):
         whitelist = self.obj_from_request(request, *args, **kwargs)
         strategy = WhitelistMiddleware().get_strategy()
-        current_ip = strategy.get_ip_from_request(ip)
+        current_ip = strategy.get_ip_from_request(request)
 
         form = self.form_class(current_ip, whitelist, request.method == 'POST' and request.POST)
 
