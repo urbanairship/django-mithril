@@ -18,12 +18,12 @@ class WhitelistEditor(object):
 
         form = self.form_class(current_ip, whitelist, request.POST) if request.method == 'POST' else self.form_class(current_ip, whitelist) 
         if form.is_valid():
-            self.save_form(form, *args, **kwargs)
+            self.save_form(request, form, *args, **kwargs)
             return HttpResponseRedirect('.')
 
         return self.respond(request, form, whitelist, *args, **kwargs)
 
-    def save_form(self, form, *args, **kwargs):
+    def save_form(self, request, form, *args, **kwargs):
         return form.save()
 
     def respond(self, request, form, whitelist, *args, **kwargs):
