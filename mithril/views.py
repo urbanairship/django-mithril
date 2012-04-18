@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect
 from mithril.forms import WhitelistForm
 
 class WhitelistEditor(object):
-    template_list = 'mithril/whitelist_edit.html'
+    template = 'mithril/whitelist_edit.html'
     form_class = WhitelistForm
 
     def __init__(self, obj_from_request):
@@ -16,10 +16,16 @@ class WhitelistEditor(object):
         form = self.form_class(whitelist, request.method == 'POST' and request.POST)
 
         if form.is_valid():
-            form.save()
+            self.save_form(form, *args, **kwargs)
             return HttpResponseRedirect('.')
 
-        return render_to_response(self.template_list, {
+        return self.respond(request, form, whitelist, *args, **kwargs)
+
+    def save_form(self, form, *args, **kwargs):
+        return form.save()
+
+    def respond(self, request, form, whitelist, *args, **kwargs):
+        return render_to_response(self.template, {
             'form':form,
             'whitelist':whitelist
         }, context_instance=RequestContext(request))
