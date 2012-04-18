@@ -26,7 +26,7 @@ setup(
     name='django-mithril',
     version='%d.%d.%d' % mithril.__version__,
     description='IP Whitelisting for Django',
-    long_description=open('README.md').read(),
+    long_description='See Readme',
     author='Chris Dickinson',
     author_email='chris@neversaw.us',
     url='http://urbanairship.github.com/django-mithril/',
@@ -34,7 +34,7 @@ setup(
     package_data={'': ['LICENSE']},
     include_package_data=True,
     install_requires=required,
-    license=open("LICENSE").read(),
+    license='MIT',
     zip_safe=False,
     classifiers=(
         'Development Status :: 1 - Alpha',
