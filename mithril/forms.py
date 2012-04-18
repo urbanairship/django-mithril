@@ -9,7 +9,7 @@ class RangeForm(forms.Form):
     cidr = forms.IntegerField(min_value=0, max_value=32)
 
     def clean(self):
-        super(RangeForm, self).clean()
+        ret_value = super(RangeForm, self).clean()
 
         ip_cidr = '%s/%s' % (self.cleaned_data['ip'], self.cleaned_data['cidr'])
 
@@ -18,6 +18,7 @@ class RangeForm(forms.Form):
         except (ValueError, netaddr.ip.AddrFormatError), e:
             raise forms.ValidationError('%s is not a valid IP/CIDR combination' % ip_cidr)
 
+        return ret_value
 
 class WhitelistForm(forms.Form):
     range_form_class = RangeForm
@@ -74,14 +75,16 @@ class WhitelistForm(forms.Form):
             type(self.whitelist).objects.filter(pk=self.whitelist.pk).update(**data)
 
         self.whitelist.range_set.all().delete()
-        
+
+        items = [item for item in self.formset.cleaned_data if not item.pop('DELETE', False) and item]
+ 
         if hasattr(self.whitelist.range_set, 'bulk_create'):
             self.whitelist.range_set.bulk_create([
                 self.whitelist.range_set.model(**item)
-                for item in self.formset_cleaned_data
+                for item in items
             ])
         else:
-            [self.whitelist.range_set.create(**item) for item in self.formset.cleaned_data]
+            [self.whitelist.range_set.create(**item) for item in items]
 
         return self.whitelist
 
