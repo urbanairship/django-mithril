@@ -14,7 +14,10 @@ if sys.argv[-1] == 'publish':
     os.system('python setup.py sdist upload')
     sys.exit()
 
-required = ['netaddr==0.7.6',]
+required = [
+    'django',
+    'netaddr==0.7.6',
+]
 packages = [
     'mithril',
     'mithril.tests',

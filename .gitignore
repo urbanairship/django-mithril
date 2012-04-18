@@ -1,0 +1,13 @@
+bin/
+build/
+django_mithril.egg-info/
+include/
+lib/
+local
+share/
+tmp/
+*.DS_Store
+*.log
+*.pyc
+*.swp
+pip-log.txt
