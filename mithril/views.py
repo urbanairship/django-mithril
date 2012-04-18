@@ -16,8 +16,7 @@ class WhitelistEditor(object):
         strategy = WhitelistMiddleware().get_strategy()
         current_ip = strategy.get_ip_from_request(request)
 
-        form = self.form_class(current_ip, whitelist, request.method == 'POST' and request.POST)
-
+        form = self.form_class(current_ip, whitelist, request.POST) if request.method == 'POST' else self.form_class(current_ip, whitelist) 
         if form.is_valid():
             self.save_form(form, *args, **kwargs)
             return HttpResponseRedirect('.')
