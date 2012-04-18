@@ -42,7 +42,7 @@ class WhitelistForm(forms.Form):
         super(WhitelistForm, self).__init__(*args, **kwargs)
 
     def build_formset_class(self):
-        return formset_factory(self.range_form_class, extra=1)
+        return formset_factory(self.range_form_class, extra=1, can_delete=True)
     
     def build_formset(self, formset_class, *args, **kwargs):
         formset_kwargs = {}
