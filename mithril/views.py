@@ -1,4 +1,4 @@
-from django.shortcut import render_to_response
+from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 from mithril.forms import WhitelistForm
