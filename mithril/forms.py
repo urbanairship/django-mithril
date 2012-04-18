@@ -1,5 +1,6 @@
 from django import forms
 from django.forms.formsets import formset_factory
+from django.template.defaultfilters import slugify
 from mithril.models import Whitelist
 import netaddr
 
@@ -23,10 +24,15 @@ class WhitelistForm(forms.Form):
     whitelist_class = Whitelist
 
     name = forms.CharField()
+    current_ip = forms.CharField(widget=forms.HiddenInput)
 
-    def __init__(self, whitelist=None, *args, **kwargs):
+
+    def __init__(self, current_ip, whitelist=None, *args, **kwargs):
         self.whitelist = whitelist
         formset_class = self.build_formset_class()
+
+        kwargs['initial'] = dict(kwargs.get('initial', {}), current_ip=current_ip)
+
         self.formset = self.build_formset(formset_class, *args, **kwargs)
 
         super(WhitelistForm, self).__init__(*args, **kwargs)
@@ -45,6 +51,11 @@ class WhitelistForm(forms.Form):
 
     def is_valid(self):
         return super(WhitelistForm, self).is_valid() and self.formset.is_valid()
+
+    def clean(self, *args, **kwargs):
+        retval = super(WhitelistForm, self).clean(*args, **kwargs)
+        self.cleaned_data['slug'] = slugify(self.cleaned_data['name'])
+        return retval
 
     def save(self):
         if not self.whitelist:
