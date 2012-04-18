@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.http import HttpResponseForbidden 
 from django.test import TestCase
-from mithril.models import Whitelist, Range
+from mithril.models import Whitelist
 from mithril.strategy import Strategy
 from mithril.tests.utils import fmt_ip
 import random
@@ -9,7 +9,9 @@ import mithril
 
 USER_COUNT = 0
 
+
 class StrategyTestCase(TestCase):
+
     def fake_request(self, expect):
         global USER_COUNT
 
@@ -26,7 +28,7 @@ class StrategyTestCase(TestCase):
         req = self.fake_request(expected)
 
         strat.request_ip_headers = ['REMOTE_ADDR', 'LOL']
-        
+
         self.assertEqual(strat.get_ip_from_request(req), expected)
 
         strat.request_ip_headers = ['LOL']
@@ -97,7 +99,8 @@ class StrategyTestCase(TestCase):
         strat.return_one = lambda *a, **kw: wl.pk
         strat.actions = [['return_one', 'pk']]
         self.assertTrue(
-            isinstance(strat.process_view(req, None, (), {}), HttpResponseForbidden)
+            isinstance(strat.process_view(req, None, (), {}),
+                HttpResponseForbidden)
         )
 
     def test_process_view_passes_curried_mithril_reset_view(self):
@@ -116,7 +119,8 @@ class StrategyTestCase(TestCase):
 
         view = lambda:None
         view.mithril_reset = \
-            lambda request, view, args, kwargs: check(request, view, args, kwargs)
+            lambda request, view, args, kwargs: check(
+                    request, view, args, kwargs)
 
         def check(request, target_view, target_args, target_kwargs):
             self.assertTrue(request is req)
@@ -158,7 +162,7 @@ class StrategyTestCase(TestCase):
 
     def test_get_authentication_backend_authenticate(self):
         Expected = object()
-    
+
         class MyStrategy(Strategy):
             partial_credential_lookup = (
                 ('pk', 'pk'),
@@ -166,7 +170,7 @@ class StrategyTestCase(TestCase):
 
         def authenticate(*args, **kwargs):
             return Expected
-         
+
         base_backend = type('Any', (object,), {'authenticate':authenticate})
         new_backend = MyStrategy.get_authentication_backend(base_backend)
 

@@ -6,6 +6,7 @@ import netaddr
 
 
 class WhitelistTestCase(TestCase):
+
     def test_netaddr_integration(self):
         # just a tiny range, here
         test_ip = random.randint(0, 0xFFFFFFFF)
@@ -23,9 +24,9 @@ class WhitelistTestCase(TestCase):
                 cidr = random.randint(1, 32) 
             )
             cidrs.append('%s/%d' % (r.ip, r.cidr))
-    
+
         self.assertEqual(
             whitelist.okay(test_ip),
             len(netaddr.all_matching_cidrs(test_ip, cidrs)) > 0
         )
- 
+

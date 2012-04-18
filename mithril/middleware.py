@@ -2,7 +2,9 @@ from django.conf import settings
 from mithril import set_current_ip
 from django.utils.importlib import import_module
 
+
 class WhitelistMiddleware(object):
+
     def get_strategy(self, django_settings=settings):
         lhs, rhs = getattr(django_settings, 'MITHRIL_STRATEGY').rsplit('.', 1)
         return getattr(import_module(lhs), rhs)() 
@@ -26,4 +28,5 @@ class WhitelistMiddleware(object):
         except AttributeError:
             pass
         else:
-            return strategy.process_view(request, view, *view_args, **view_kwargs)
+            return strategy.process_view(
+                    request, view, *view_args, **view_kwargs)

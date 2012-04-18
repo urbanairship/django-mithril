@@ -25,7 +25,7 @@ class MiddlewareTestCase(TestCase):
 
     def test_process_request_calls_set_ip(self):
         self.assertEqual(mithril.get_current_ip(), None)
-        expected = '%d.%d.%d.%d' % tuple([random.randint(1, 127)] * 4)
+        expected = '%d.%d.%d.%d' % tuple([random.randint(1, 254)] * 4)
         with self.settings(MIDDLEWARE_CLASSES=['mithril.middleware.WhitelistMiddleware'], MITHRIL_STRATEGY='mithril.tests.fake_strategy.FakeStrategy'):
             try:
                 self.client.get('/', REMOTE_ADDR=expected)

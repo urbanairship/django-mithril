@@ -6,7 +6,9 @@ from mithril.models import Whitelist
 from mithril.signals import user_view_failed, user_login_failed
 import mithril
 
+
 class Strategy(object):
+
     validate_whitelists = all
     forbidden_response_class = HttpResponseForbidden
     model = Whitelist
@@ -63,7 +65,7 @@ class Strategy(object):
                             )   
                         except NoReverseMatch:
                             url = None
- 
+
                         self.view_signal.send(
                             sender=self,
                             user=request.user,
@@ -72,17 +74,19 @@ class Strategy(object):
                             whitelists=whitelists,
                         )
                         return response
-                    
+
     def whitelist_ip(self, ip, whitelists, response_fn):
         okay = False
         if ip is not None:
-            okay = self.validate_whitelists(map(lambda w: w.okay(ip), whitelists))
+            okay = self.validate_whitelists(
+                    map(lambda w: w.okay(ip), whitelists))
 
         if not okay:
             return response_fn()
 
     @classmethod
-    def get_authentication_backend(cls, base_backend, get_ip=mithril.get_current_ip):
+    def get_authentication_backend(
+            cls, base_backend, get_ip=mithril.get_current_ip):
         class MithrilBackend(base_backend):
             def authenticate(self, **kwargs):
                 user = super(MithrilBackend, self).authenticate(**kwargs)
@@ -100,8 +104,9 @@ class Strategy(object):
                         # location during the ``process_request``
                         # portion of the middleware cycle.
                         ip = get_ip()
- 
-                        if cls.validate_whitelists(map(lambda w: w.okay(ip), whitelists)):
+
+                        if cls.validate_whitelists(
+                                map(lambda w: w.okay(ip), whitelists)):
                             return user
                         else:
                             # that user shouldn't login!
@@ -111,7 +116,7 @@ class Strategy(object):
                                 ip=ip,
                                 whitelists=whitelists,
                             )
-         
+
             # NB: Sometimes the cure is worse than the cold.
             # Django does some pretty "awesome" stuff to try and determine
             # which auth backend loaded a user. In this case, we only care
@@ -122,7 +127,7 @@ class Strategy(object):
             @property
             def __module__(self):
                 return base_backend.__module__
-    
+
             @property
             def __class__(self):
                 return base_backend

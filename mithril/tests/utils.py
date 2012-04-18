@@ -1,6 +1,7 @@
 def fake_settings(**kwargs):
     return type('FakeSettings', (object,), kwargs)()
 
+
 def fmt_ip(ip_int):
     return '%d.%d.%d.%d' % (
         (ip_int & (0xFF << 24)) >> 24,

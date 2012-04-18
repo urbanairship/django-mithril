@@ -4,11 +4,13 @@ from mithril.decorators import exempt, resettable
 
 import random
 
+
 class TestOfMithrilDecorators(TestCase):
+
     def test_exempt_attaches_appropriate_flag(self):
         anything = lambda *a: a
         expected = random.randint(0, 10)
-        
+
         anything = exempt(anything)
 
         self.assertTrue(anything.mithril_exempt)
