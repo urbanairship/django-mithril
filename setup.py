@@ -15,7 +15,6 @@ if sys.argv[-1] == 'publish':
     sys.exit()
 
 required = [
-    'django',
     'netaddr==0.7.6',
 ]
 packages = [
