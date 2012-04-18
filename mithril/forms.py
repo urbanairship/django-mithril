@@ -31,7 +31,11 @@ class WhitelistForm(forms.Form):
         self.whitelist = whitelist
         formset_class = self.build_formset_class()
 
-        kwargs['initial'] = dict(kwargs.get('initial', {}), current_ip=current_ip)
+        extend_initial = {'current_ip':current_ip}
+        if self.whitelist:
+            extend_initial['name'] = self.whitelist.name
+
+        kwargs['initial'] = dict(kwargs.get('initial', {}), **extend_initial)
 
         self.formset = self.build_formset(formset_class, *args, **kwargs)
 
