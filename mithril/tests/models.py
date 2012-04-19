@@ -10,7 +10,7 @@ class WhitelistTestCase(TestCase):
     def test_netaddr_integration(self):
         # just a tiny range, here
         test_ip = random.randint(0, 0xFFFFFFFF)
-        num_ranges = random.randint(0, 10)
+        num_ranges = random.randint(1, 10)
 
         whitelist = Whitelist.objects.create(
             name='anything',

@@ -60,6 +60,8 @@ class WhitelistForm(forms.Form):
         if self.whitelist:
             formset_kwargs['initial'] = self.whitelist.range_set.values('ip', 'cidr')
 
+        formset_kwargs['prefix'] = prefix
+
         return formset_class(*args, **formset_kwargs)
 
     def is_valid(self):
@@ -67,7 +69,8 @@ class WhitelistForm(forms.Form):
 
     def clean(self, *args, **kwargs):
         retval = super(WhitelistForm, self).clean(*args, **kwargs)
-        self.cleaned_data['slug'] = slugify(self.cleaned_data['name'])
+        if self.cleaned_data.get('name', None) is not None:
+            self.cleaned_data['slug'] = slugify(self.cleaned_data['name'])
         return retval
 
     def save(self):
@@ -85,14 +88,8 @@ class WhitelistForm(forms.Form):
         self.whitelist.range_set.all().delete()
 
         items = [item for item in self.formset.cleaned_data if not item.pop('DELETE', False) and item]
- 
-        if hasattr(self.whitelist.range_set, 'bulk_create'):
-            self.whitelist.range_set.bulk_create([
-                self.whitelist.range_set.model(**item)
-                for item in items
-            ])
-        else:
-            [self.whitelist.range_set.create(**item) for item in items]
+
+        [self.whitelist.range_set.create(**item) for item in items]
 
         return self.whitelist
 

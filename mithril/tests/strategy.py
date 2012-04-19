@@ -96,6 +96,11 @@ class StrategyTestCase(TestCase):
             slug='okay'
         )
 
+        wl.range_set.create(
+            ip='0.0.0.0',
+            cidr=32
+        )
+
         strat.return_one = lambda *a, **kw: wl.pk
         strat.actions = [['return_one', 'pk']]
         self.assertTrue(
@@ -112,6 +117,11 @@ class StrategyTestCase(TestCase):
         wl = Whitelist.objects.create(
             name='okay',
             slug='okay'
+        )
+
+        wl.range_set.create(
+            ip='0.0.0.0',
+            cidr=32
         )
 
         strat.return_one = lambda *a, **kw: wl.pk
