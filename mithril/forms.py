@@ -55,7 +55,10 @@ class WhitelistForm(forms.Form):
         formset_kwargs.update(kwargs)
 
         prefix = '%s_formset' % kwargs.get('prefix', '')
-        formset_kwargs['initial'] = self.whitelist.range_set.values('ip', 'cidr')
+
+        formset_kwargs.pop('initial', None)
+        if self.whitelist:
+            formset_kwargs['initial'] = self.whitelist.range_set.values('ip', 'cidr')
 
         return formset_class(*args, **formset_kwargs)
 
