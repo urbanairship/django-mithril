@@ -10,6 +10,12 @@ class Whitelist(models.Model):
 
     def okay(self, ip, validate=netaddr.all_matching_cidrs):
         cidrs = ['%s/%d' % _range for _range in self.range_set.values_list('ip', 'cidr')] 
+
+        # if there are no associated ranges
+        # with this whitelist, *do not fail*.
+        if not len(cidrs):
+            return True
+
         return len(validate(ip, cidrs)) > 0
 
 class Range(models.Model):
