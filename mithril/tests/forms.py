@@ -78,11 +78,11 @@ class MithrilFormsTestCase(TestCase):
     def test_is_valid_validates_formset(self):
 
         data = {
-            'name':'x',
-            'current_ip':'x',
-            '_formset-TOTAL_FORMS':'0',
-            '_formset-INITIAL_FORMS':'0',
-            '_formset-MAX_FORMS':'0',
+            'name': 'x',
+            'current_ip': 'x',
+            '_formset-TOTAL_FORMS': '0',
+            '_formset-INITIAL_FORMS': '0',
+            '_formset-MAX_FORMS': '0',
         }
         wlf = WhitelistForm(None, None, data)
         wlf.formset = type('X', (object,), {'is_valid':lambda *a: True})()
@@ -96,11 +96,11 @@ class MithrilFormsTestCase(TestCase):
     def test_clean_sets_slug_to_slugified_name(self):
         name = ' '.join([str(random.randint(0, 10)) for i in range(10)])
         data = {
-            'name':name,
-            'current_ip':'x',
-            '_formset-TOTAL_FORMS':'0',
-            '_formset-INITIAL_FORMS':'0',
-            '_formset-MAX_FORMS':'0',
+            'name': name,
+            'current_ip': 'x',
+            '_formset-TOTAL_FORMS': '0',
+            '_formset-INITIAL_FORMS': '0',
+            '_formset-MAX_FORMS': '0',
         }
         wlf = WhitelistForm(None, None, data)
         wlf.is_valid()
@@ -110,11 +110,11 @@ class MithrilFormsTestCase(TestCase):
         num_forms = random.randint(1, 10)
         name = ' '.join([str(random.randint(0, 10)) for i in range(10)])
         data = {
-            'name':name,
-            'current_ip':'x',
-            '_formset-TOTAL_FORMS':'%d' % num_forms,
-            '_formset-INITIAL_FORMS':'0',
-            '_formset-MAX_FORMS':'',
+            'name': name,
+            'current_ip': 'x',
+            '_formset-TOTAL_FORMS': '%d' % num_forms,
+            '_formset-INITIAL_FORMS': '0',
+            '_formset-MAX_FORMS': '',
         }
 
         for i in range(num_forms):
@@ -138,11 +138,11 @@ class MithrilFormsTestCase(TestCase):
     def test_save_sets_appropriate_field_values(self):
         name = ' '.join([str(random.randint(0, 10)) for i in range(10)])
         data = {
-            'name':name,
-            'current_ip':'x',
-            '_formset-TOTAL_FORMS':'0',
-            '_formset-INITIAL_FORMS':'0',
-            '_formset-MAX_FORMS':'0',
+            'name': name,
+            'current_ip': 'x',
+            '_formset-TOTAL_FORMS': '0',
+            '_formset-INITIAL_FORMS': '0',
+            '_formset-MAX_FORMS': '0',
         }
         wl = Whitelist.objects.create(
             name='asdf',
@@ -160,11 +160,11 @@ class MithrilFormsTestCase(TestCase):
     def test_save_returns_created_whitelist(self):
         name = ' '.join([str(random.randint(0, 10)) for i in range(10)])
         data = {
-            'name':name,
-            'current_ip':'x',
-            '_formset-TOTAL_FORMS':'0',
-            '_formset-INITIAL_FORMS':'0',
-            '_formset-MAX_FORMS':'0',
+            'name': name,
+            'current_ip': 'x',
+            '_formset-TOTAL_FORMS': '0',
+            '_formset-INITIAL_FORMS': '0',
+            '_formset-MAX_FORMS': '0',
         }
         wl = Whitelist.objects.create(
             name='asdf',

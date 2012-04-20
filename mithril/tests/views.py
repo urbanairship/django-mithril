@@ -11,7 +11,7 @@ Expected = object()
 
 def test_context_processor(request):
     return {
-        'expected':Expected
+        'expected': Expected
     }
 
 class ViewDispatch(object):
@@ -26,11 +26,11 @@ urlpatterns = patterns('',
 
 class MithrilViewTestCase(TestCase):
     test_settings = {
-        'TEMPLATE_LOADERS':('django.template.loaders.filesystem.Loader',),
-        'TEMPLATE_DIRS':(os.path.join(os.path.dirname(__file__), 'templates'),),
-        'TEMPLATE_CONTEXT_PROCESSORS':('mithril.tests.views.test_context_processor',),
-        'MITHRIL_STRATEGY':'mithril.tests.fake_strategy.FakeStrategy',
-        'ROOT_URLCONF':'mithril.tests.views',
+        'TEMPLATE_LOADERS': ('django.template.loaders.filesystem.Loader',),
+        'TEMPLATE_DIRS': (os.path.join(os.path.dirname(__file__), 'templates'),),
+        'TEMPLATE_CONTEXT_PROCESSORS': ('mithril.tests.views.test_context_processor',),
+        'MITHRIL_STRATEGY': 'mithril.tests.fake_strategy.FakeStrategy',
+        'ROOT_URLCONF': 'mithril.tests.views',
     }
 
     def test_view_returns_form_and_whitelist_on_get(self):
