@@ -20,9 +20,11 @@ class WhitelistEditor(object):
         strategy = WhitelistMiddleware().get_strategy()
         current_ip = strategy.get_ip_from_request(request)
 
-        form_args, form_kwargs = (current_ip, whitelist), {
-            'range_form_class':getattr(self, 'range_form_class', None)
-        }
+        form_args = (current_ip, whitelist)
+        form_kwargs = {}
+        if hasattr(self, 'range_form_class'):
+            form_kwargs = {'range_form_class': self.range_form_class}
+ 
         if request.method == 'POST':
             form_args += (request.POST,) 
         form = self.form_class(*form_args, **form_kwargs)
