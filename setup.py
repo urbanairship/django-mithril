@@ -29,7 +29,7 @@ setup(
     description='IP Whitelisting for Django',
     long_description=open('README.md').read(),
     author='Chris Dickinson',
-    author_email='chris@neversaw.us',
+    author_email='chrisdickinson@urbanairship.com',
     url='http://urbanairship.github.com/django-mithril/',
     packages=packages,
     package_data={'': ['LICENSE']},
