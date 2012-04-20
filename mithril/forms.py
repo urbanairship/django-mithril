@@ -77,8 +77,8 @@ class WhitelistForm(forms.Form):
 
     def save(self):
         data = {
-            'name':self.cleaned_data['name'],
-            'slug':self.cleaned_data['slug'],
+            'name': self.cleaned_data['name'],
+            'slug': self.cleaned_data['slug'],
         }
 
         if not self.whitelist:
