@@ -1,3 +1,5 @@
+# (c) 2012 Urban Airship and Contributors
+
 __version__ = (0, 0, 4)
 
 class RequestIPStorage(object):

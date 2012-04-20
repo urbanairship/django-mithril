@@ -1,3 +1,5 @@
+# (c) 2012 Urban Airship and Contributors
+
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponseRedirect

@@ -1,3 +1,5 @@
+# (c) 2012 Urban Airship and Contributors
+
 from django.test import TestCase
 from django.template.defaultfilters import slugify
 from mithril.forms import WhitelistForm, RangeForm

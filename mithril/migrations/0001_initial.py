@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# (c) 2012 Urban Airship and Contributors
+
 import datetime
 from south.db import db
 from south.v2 import SchemaMigration

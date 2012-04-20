@@ -1,3 +1,5 @@
+# (c) 2012 Urban Airship and Contributors
+
 from django.http import HttpResponseForbidden 
 from django.utils.functional import curry
 from django.core.exceptions import FieldError

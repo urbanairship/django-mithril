@@ -1,3 +1,5 @@
+# (c) 2012 Urban Airship and Contributors
+
 from django.contrib.auth.models import User
 from django.http import HttpResponseForbidden 
 from django.test import TestCase

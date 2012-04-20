@@ -1,3 +1,5 @@
+# (c) 2012 Urban Airship and Contributors
+
 from django.conf import settings
 from mithril import set_current_ip
 from django.utils.importlib import import_module

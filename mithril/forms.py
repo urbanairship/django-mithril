@@ -1,3 +1,5 @@
+# (c) 2012 Urban Airship and Contributors
+
 from django import forms
 from django.forms.formsets import formset_factory
 from django.template.defaultfilters import slugify

@@ -1,3 +1,5 @@
+# (c) 2012 Urban Airship and Contributors
+
 from django.test import TestCase
 from mithril.tests.utils import fake_settings
 from mithril.tests.fake_strategy import FakeStrategy

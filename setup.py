@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# (c) 2012 Urban Airship and Contributors
 
 import os
 import sys

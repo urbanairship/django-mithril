@@ -1,3 +1,5 @@
+# (c) 2012 Urban Airship and Contributors
+
 from django.test import TestCase
 from mithril.models import Whitelist
 from mithril.tests.utils import fmt_ip

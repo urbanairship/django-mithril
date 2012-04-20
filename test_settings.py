@@ -1,3 +1,5 @@
+# (c) 2012 Urban Airship and Contributors
+
 DATABASES = {'default':{
     'NAME':'project.db',
     'ENGINE':'django.db.backends.sqlite3'

@@ -1,3 +1,5 @@
+# (c) 2012 Urban Airship and Contributors
+
 def fake_settings(**kwargs):
     return type('FakeSettings', (object,), kwargs)()
 

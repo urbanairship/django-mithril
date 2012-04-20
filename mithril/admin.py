@@ -1,3 +1,5 @@
+# (c) 2012 Urban Airship and Contributors
+
 from django.contrib import admin
 from mithril import models
 from django.conf import settings
