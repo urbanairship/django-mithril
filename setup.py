@@ -21,6 +21,7 @@ required = [
 packages = [
     'mithril',
     'mithril.tests',
+    'mithril.migrations',
 ]
 
 setup(
