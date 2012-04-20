@@ -36,7 +36,7 @@ class WhitelistForm(forms.Form):
     def __init__(self, current_ip, whitelist=None, *args, **kwargs):
         self.whitelist = whitelist
         formset_class = self.build_formset_class(
-            kwargs.pop('range_form_class', None) or self.range_form_class
+            kwargs.pop('range_form_class', self.range_form_class)
         )
 
         extend_initial = {'current_ip':current_ip}
