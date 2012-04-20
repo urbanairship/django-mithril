@@ -87,9 +87,16 @@ class WhitelistForm(forms.Form):
 
         self.whitelist.range_set.all().delete()
 
-        items = [item for item in self.formset.cleaned_data if not item.pop('DELETE', False) and item]
+        for form in self.formset.forms:
+            if form in self.formset.deleted_forms:
+                continue
 
-        [self.whitelist.range_set.create(**item) for item in items]
+            form_data = {
+                'ip':form.cleaned_data['ip'],
+                'cidr':form.cleaned_data['cidr'], 
+            }
+          
+            self.whitelist.range_set.create(**form_data)
 
         return self.whitelist
 

@@ -13,7 +13,7 @@ class WhitelistEditor(object):
     def __init__(self, obj_from_request):
         self.obj_from_request = obj_from_request
 
-    def __call__(self, request, whitelist_pk=None, *args, **kwargs):
+    def __call__(self, request, *args, **kwargs):
         whitelist = self.obj_from_request(request, *args, **kwargs)
         strategy = WhitelistMiddleware().get_strategy()
         current_ip = strategy.get_ip_from_request(request)
