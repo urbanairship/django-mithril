@@ -4,12 +4,8 @@ import functools
 
 
 def exempt(view):
-    @functools.wraps(view)
-    def inner(*args, **kwargs):
-        return view(*args, **kwargs)
-
-    inner.mithril_exempt = True
-    return inner
+    view.mithril_exempt = True
+    return view
 
 
 def resettable(reset_view):
