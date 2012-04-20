@@ -83,7 +83,11 @@ class MithrilViewTestCase(TestCase):
 
         formset = WhitelistEditor.form_class(None, None).formset
         formset_data = formset.management_form.initial
-        data = dict([('%s-%s' % (formset.prefix, key), value if value is not None else '') for key, value in formset_data.iteritems()])
+        data = dict([
+            ('%s-%s' % (formset.prefix, key), value if value is not None else '') 
+            for key, value 
+            in formset_data.iteritems()
+        ])
 
         with self.settings(**self.test_settings):
             resp = self.client.post('/', data)
@@ -97,7 +101,11 @@ class MithrilViewTestCase(TestCase):
 
         formset = WhitelistEditor.form_class(None, None).formset
         formset_data = formset.management_form.initial
-        data = dict([('%s-%s' % (formset.prefix, key), value if value is not None else '') for key, value in formset_data.iteritems()])
+        data = dict([
+            ('%s-%s' % (formset.prefix, key), value if value is not None else '')
+            for key, value
+            in formset_data.iteritems()
+        ])
         data['name'] = 'random'
         data['current_ip'] = '0.0.0.0'
 
@@ -111,7 +119,11 @@ class MithrilViewTestCase(TestCase):
 
         formset = WhitelistEditor.form_class(None, None).formset
         formset_data = formset.management_form.initial
-        data = dict([('%s-%s' % (formset.prefix, key), value if value is not None else '') for key, value in formset_data.iteritems()])
+        data = dict([
+            ('%s-%s' % (formset.prefix, key), value if value is not None else '')
+            for key, value
+            in formset_data.iteritems()
+        ])
         data['name'] = 'random'
         data['current_ip'] = '0.0.0.0'
 
@@ -129,7 +141,11 @@ class MithrilViewTestCase(TestCase):
 
         formset = WhitelistEditor.form_class(None, None).formset
         formset_data = formset.management_form.initial
-        data = dict([('%s-%s' % (formset.prefix, key), value if value is not None else '') for key, value in formset_data.iteritems()])
+        data = dict([
+            ('%s-%s' % (formset.prefix, key), value if value is not None else '')
+            for key, value
+            in formset_data.iteritems()
+        ])
         data['name'] = 'random'
         data['current_ip'] = '0.0.0.0'
 
