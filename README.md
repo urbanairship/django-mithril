@@ -22,7 +22,7 @@ backends for IP whitelisting.
 ## Getting Started
 
 Mithril works by providing two new models -- `Whitelist` and `Range` -- that you
-make foreign key to from your objects. You define a `mithril.strategy.Strategy`
+make a foreign key to from your objects. You define a `mithril.strategy.Strategy`
 subclass to describe to mithril how you would like to obtain a `Whitelist` from
 a request.
 
