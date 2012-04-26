@@ -5,10 +5,11 @@ from django.template.defaultfilters import slugify
 from mithril.forms import WhitelistForm, RangeForm
 from mithril.models import Whitelist
 from mithril.tests.utils import fmt_ip
-from django import forms
 import random
 
+
 class MithrilFormsTestCase(TestCase):
+
     def test_allows_custom_range_form_class(self):
         class CustomRangeForm(RangeForm):
             pass
@@ -85,13 +86,14 @@ class MithrilFormsTestCase(TestCase):
             '_formset-MAX_FORMS': '0',
         }
         wlf = WhitelistForm(None, None, data)
-        wlf.formset = type('X', (object,), {'is_valid':lambda *a: True})()
+        wlf.formset = type('X', (object,), {'is_valid':lambda *a: True,
+                                            'forms': []})()
         self.assertTrue(wlf.is_valid())
 
         wlf = WhitelistForm(None, None, data)
-        wlf.formset = type('X', (object,), {'is_valid':lambda *a: False})()
+        wlf.formset = type('X', (object,), {'is_valid':lambda *a: False,
+                                            'forms': []})()
         self.assertFalse(wlf.is_valid())
-        
 
     def test_clean_sets_slug_to_slugified_name(self):
         name = ' '.join([str(random.randint(0, 10)) for i in range(10)])
@@ -120,13 +122,13 @@ class MithrilFormsTestCase(TestCase):
         for i in range(num_forms):
             data['_formset-%d-ip' % i] = fmt_ip(random.randint(0, 0xFFFFFFFF))
             data['_formset-%d-cidr' % i] = random.randint(0, 32)
-    
+
         wlf = WhitelistForm(None, None, data)
 
         wlf.is_valid()
 
         self.assertTrue(wlf.is_valid())
-        
+
         wl = wlf.save()
 
         for i in range(num_forms):

@@ -85,7 +85,7 @@ class WhitelistForm(forms.Form):
 
             cidr_ips.append('%(ip)s/%(cidr)s' % (form.cleaned_data))
 
-        if self._current_ip:
+        if self._current_ip and cidr_ips:
             ips = netaddr.all_matching_cidrs(self._current_ip, cidr_ips)
             if not ips:
                 raise forms.ValidationError(
