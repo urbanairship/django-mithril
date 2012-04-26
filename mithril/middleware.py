@@ -1,74 +1,34 @@
+# (c) 2012 Urban Airship and Contributors
+
 from django.conf import settings
+from mithril import set_current_ip
+from django.utils.importlib import import_module
 
-__all__ = ( 
-    'IPWhitelistAllMiddleware',
-    'IPWhitelistAnyMiddleware',
-)
 
-LOOKUPS_SETTING = 'MITHRIL_WHITELIST_TO_USER_LOOKUPS' 
-HEADERS_SETTING = 'MITHRIL_WHITELIST_IP_HEADER'
+class WhitelistMiddleware(object):
 
-MITHRIL_WHITELIST_TO_USER_LOOKUPS = (
-    'company__granted_perm__user',
-    'company__admins__user',
-)
+    def get_strategy(self, django_settings=settings):
+        lhs, rhs = getattr(django_settings, 'MITHRIL_STRATEGY').rsplit('.', 1)
+        return getattr(import_module(lhs), rhs)() 
 
-MITHRIL_WHITELIST_IP_HEADER = (
-    'HTTP_TRUE_IP',
-    'HTTP_X_FORWARDED_FOR',
-    'REMOTE_ADDR'
-)
-
-class IPWhitelistMiddleware(object):
-    
-    # default behavior is that an ip must pass
-    # "all" whitelists to be applicable
-    behavior = all
-
-    def ip_from_request(request):
-        headers = getattr(settings, HEADERS_SETTING, [])
-        for header_name in headers:
-            ip = request.META.get(header_name, None)
-            if ip is not None:
-                return ip
-
-    def ip_in_whitelist(self, ip, whitelists):
-        return self.behavior(lambda r : self.ip_in_whitelist(ip, r), whitelists)
-
-    def ip_in_whitelist(self, ip, whitelist):
-        return whitelist.okay(ip)
-
-    def get_applicable_whitelists(self, request):
-        user = request.user
-        whitelist_to_user_lookups = getattr(settings, LOOKUPS_SETTING, [])
-
-        whitelists = []
-        for lookup in whitelist_to_user_lookups:
-            whitelists.append(
-                Whitelist.objects.filter(**{
-                    lookup:user
-                })[:]
-            )
-
-        return whitelists
-
-    def process_request(self, request, *args, **kwargs):
+    def process_request(self, request, set_ip=set_current_ip):
+        # no matter what, clear the current IP.
+        set_ip(None)
         try:
-            whitelists = self.get_applicable_whitelists(request)
-            ip = self.ip_from_request(request)
-            is_valid_ip = self.ip_in_whitelists(ip, whitelists)
-            return self.whitelist(ip, is_valid_ip, whitelists)
+            strategy = self.get_strategy()
         except AttributeError:
-            return None  
+            pass
+        else:
+            set_ip(strategy.get_ip_from_request(request))
 
-    def whitelist(self, ip, is_valid, whitelists):
-        return None
+    def process_view(self, request, view, view_args, view_kwargs):
+        if getattr(view, 'mithril_exempt', None):
+            return None
 
-class IPWhitelistAllMiddleware(IPWhitelistMiddleware):
-    pass
-
-class IPWhitelistAnyMiddleware(IPWhitelistMiddleware):
-
-    # if it passes any whitelist, it's valid.
-    behavior = any
-
+        try:
+            strategy = self.get_strategy()
+        except AttributeError:
+            pass
+        else:
+            return strategy.process_view(
+                    request, view, *view_args, **view_kwargs)
