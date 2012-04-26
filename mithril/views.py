@@ -3,6 +3,7 @@
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
+
 from mithril.forms import WhitelistForm
 from mithril.middleware import WhitelistMiddleware
 
@@ -24,7 +25,7 @@ class WhitelistEditor(object):
         form_kwargs = {}
         if hasattr(self, 'range_form_class'):
             form_kwargs = {'range_form_class': self.range_form_class}
- 
+
         if request.method == 'POST':
             form_args += (request.POST,) 
         form = self.form_class(*form_args, **form_kwargs)

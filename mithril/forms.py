@@ -6,6 +6,7 @@ from django.template.defaultfilters import slugify
 from mithril.models import Whitelist
 import netaddr
 
+
 class RangeForm(forms.Form):
     ip = forms.IPAddressField()
     cidr = forms.IntegerField(min_value=0, max_value=32)
@@ -25,16 +26,18 @@ class RangeForm(forms.Form):
 
         return ret_value
 
+
 class WhitelistForm(forms.Form):
+
     range_form_class = RangeForm
     whitelist_class = Whitelist
 
     name = forms.CharField()
     current_ip = forms.CharField(widget=forms.HiddenInput)
 
-
     def __init__(self, current_ip, whitelist=None, *args, **kwargs):
         self.whitelist = whitelist
+        self._current_ip = current_ip
         formset_class = self.build_formset_class(
             kwargs.pop('range_form_class', self.range_form_class)
         )
@@ -51,7 +54,7 @@ class WhitelistForm(forms.Form):
 
     def build_formset_class(self, base_class):
         return formset_factory(base_class, extra=0, can_delete=True)
-    
+
     def build_formset(self, formset_class, *args, **kwargs):
         formset_kwargs = {}
         formset_kwargs.update(kwargs)
@@ -67,12 +70,27 @@ class WhitelistForm(forms.Form):
         return formset_class(*args, **formset_kwargs)
 
     def is_valid(self):
-        return super(WhitelistForm, self).is_valid() and self.formset.is_valid()
+        return self.formset.is_valid() and super(
+                WhitelistForm, self).is_valid()
 
     def clean(self, *args, **kwargs):
         retval = super(WhitelistForm, self).clean(*args, **kwargs)
         if self.cleaned_data.get('name', None) is not None:
             self.cleaned_data['slug'] = slugify(self.cleaned_data['name'])
+
+        cidr_ips = []
+        for form in self.formset.forms:
+            if form in self.formset.deleted_forms:
+                continue
+
+            cidr_ips.append('%(ip)s/%(cidr)s' % (form.cleaned_data))
+
+        if self._current_ip:
+            ips = netaddr.all_matching_cidrs(self._current_ip, cidr_ips)
+            if not ips:
+                raise forms.ValidationError(
+                        'These settings would blacklist your current IP.')
+
         return retval
 
     def save(self):
@@ -85,7 +103,8 @@ class WhitelistForm(forms.Form):
             self.whitelist = self.whitelist_class(**data)
             self.whitelist.save()
         else:
-            type(self.whitelist).objects.filter(pk=self.whitelist.pk).update(**data)
+            type(self.whitelist).objects.filter(
+                    pk=self.whitelist.pk).update(**data)
 
         self.whitelist.range_set.all().delete()
 
@@ -97,7 +116,6 @@ class WhitelistForm(forms.Form):
                 'ip':form.cleaned_data['ip'],
                 'cidr':form.cleaned_data['cidr'], 
             }
-          
             self.whitelist.range_set.create(**form_data)
 
         return self.whitelist
