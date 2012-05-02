@@ -78,9 +78,13 @@ class WhitelistForm(forms.Form):
         if self.cleaned_data.get('name', None) is not None:
             self.cleaned_data['slug'] = slugify(self.cleaned_data['name'])
 
+        if not self.formset.is_valid():
+            return
+
         cidr_ips = []
+        has_deleted_forms = hasattr(self.formset, 'deleted_forms')
         for form in self.formset.forms:
-            if form in self.formset.deleted_forms:
+            if has_deleted_forms and form in self.formset.deleted_forms:
                 continue
 
             cidr_ips.append('%(ip)s/%(cidr)s' % (form.cleaned_data))
