@@ -32,7 +32,7 @@ class Strategy(object):
 
     def process_view(self, request, view, *args, **kwargs):
 
-        # Superusers get excempted.
+        # Superusers get exempted.
         is_superuser = getattr(request.user, 'is_superuser', None)
         if is_superuser:
             return None
