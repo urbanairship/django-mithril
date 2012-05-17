@@ -1,5 +1,6 @@
 bin/
 build/
+dist/
 django_mithril.egg-info/
 include/
 lib/

@@ -31,6 +31,12 @@ class Strategy(object):
         return None
 
     def process_view(self, request, view, *args, **kwargs):
+
+        # Superusers get excempted.
+        is_superuser = getattr(request.user, 'is_superuser', None)
+        if is_superuser:
+            return None
+
         ip = self.get_ip_from_request(request)
         for predicate, lookup in self.actions:
             method = getattr(self, predicate, None)

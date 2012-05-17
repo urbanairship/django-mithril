@@ -23,6 +23,20 @@ class StrategyTestCase(TestCase):
             'user':User.objects.create_user('random-%d'%USER_COUNT)
         })()
 
+    def test_super_user_excempt(self):
+        """Make sure that superuser is excempt from IP whitelists."""
+
+        strat = Strategy()
+
+        expected = random.randint(1, 10)
+        req = self.fake_request(expected)
+        req.user.is_superuser = True
+
+        self.assertEqual(
+            strat.process_view(req, None, (), {}),
+            None
+        )
+
     def test_get_ip_from_request(self):
         strat = Strategy()
 
@@ -35,7 +49,7 @@ class StrategyTestCase(TestCase):
 
         strat.request_ip_headers = ['LOL']
         self.assertEqual(strat.get_ip_from_request(req), 0)
-        
+
         strat.request_ip_headers = ['LOL', 'REMOTE_ADDR']
         self.assertEqual(strat.get_ip_from_request(req), 0)
 
