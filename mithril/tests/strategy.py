@@ -26,10 +26,23 @@ class StrategyTestCase(TestCase):
     def test_super_user_excempt(self):
         """Make sure that superuser is excempt from IP whitelists."""
 
-        strat = Strategy()
 
-        expected = random.randint(1, 10)
+        expected = '10.112.12.12'
         req = self.fake_request(expected)
+        req.user.is_superuser = False
+
+        whitelist = Whitelist.objects.create(name='asdf', slug='asdf')
+        whitelist.range_set.create(ip='127.0.0.1', cidr=32)
+
+        strat = Strategy()
+        strat.return_one = lambda *a, **kw: whitelist.pk
+        strat.actions = [['return_one', 'pk']]
+
+        self.assertTrue(
+                isinstance(strat.process_view(req, None, (), {}),
+                    HttpResponseForbidden)
+        )
+
         req.user.is_superuser = True
 
         self.assertEqual(
