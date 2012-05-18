@@ -1,6 +1,6 @@
 # (c) 2012 Urban Airship and Contributors
 
-__version__ = (0, 0, 6)
+__version__ = (0, 0, 8)
 
 class RequestIPStorage(object):
     def __init__(self):
