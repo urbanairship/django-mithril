@@ -1,9 +1,10 @@
 # (c) 2012 Urban Airship and Contributors
 
 from django import forms
+from django.core.cache import cache
 from django.forms.formsets import formset_factory
 from django.template.defaultfilters import slugify
-from mithril.models import Whitelist
+from mithril.models import Whitelist, CachedWhitelistManager
 import netaddr
 
 
@@ -97,6 +98,15 @@ class WhitelistForm(forms.Form):
 
         return retval
 
+    def destroy_cache(self, whitelist):
+        cwm = CachedWhitelistManager()
+
+        reverse_key = cwm.make_reverse_cache_key(whitelist)
+        reverse_value = cache.get(reverse_key)
+
+        if reverse_value:
+            cache.delete(reverse_value)
+
     def save(self):
         data = {
             'name': self.cleaned_data['name'],
@@ -121,6 +131,8 @@ class WhitelistForm(forms.Form):
                 'cidr':form.cleaned_data['cidr'], 
             }
             self.whitelist.range_set.create(**form_data)
+
+        self.destroy_cache(self.whitelist)
 
         return self.whitelist
 

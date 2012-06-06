@@ -4,7 +4,7 @@ from django.http import HttpResponseForbidden
 from django.utils.functional import curry
 from django.core.exceptions import FieldError
 from django.core.urlresolvers import NoReverseMatch, reverse
-from mithril.models import Whitelist
+from mithril.models import Whitelist, CachedWhitelist
 from mithril.signals import user_view_failed, user_login_failed
 import mithril
 
@@ -141,3 +141,6 @@ class Strategy(object):
                 return base_backend
 
         return MithrilBackend
+
+class CachedStrategy(Strategy):
+    model = CachedWhitelist
