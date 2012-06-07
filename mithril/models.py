@@ -14,19 +14,15 @@ class CachedWhitelistManager(models.Manager):
 
         obj = super_create(**kwargs)
 
-        reverse_key = self.make_reverse_cache_key(obj)
-        reverse_val = cache.get(reverse_key)
-
-        if reverse_val is not None:
-            cache.delete(reverse_val)
-            cache.delete(reverse_key)
+        self.clear_cache_for(obj)
 
         return obj
 
     def filter(self, **kwargs):
         super_filter = super(CachedWhitelistManager, self).filter
+
         try:
-            lookup, value = kwargs.items()[0]
+            [(lookup, value)] = kwargs.items()
         except ValueError:
             return super_filter(**kwargs)
 
@@ -57,18 +53,47 @@ class CachedWhitelistManager(models.Manager):
     def make_reverse_cache_key(self, item):
         return 'whitelist:%s' % str(item.pk)
 
-    def hydrate(self, item, lookup, value):
-        ranges = item.pop('ranges', [])
-        item = self.model(**item)
+    def hydrate(self, data, lookup, value):
+        """
+            Given encoded JSON data representing a whitelist and its
+            ranges, and the lookup and value that yielded that whitelist,
+            recreate the whitelist as a full-fledged model instance.
+
+            Additionally, store a reverse key to the lookup and value that
+            created this whitelist (for cache invalidation.)
+        """
+        ranges = data.pop('ranges', [])
+        item = self.model(**data)
 
         item.ranges = ranges
 
-        key = self.make_reverse_cache_key(item)
-        value = self.make_cache_key(lookup, value) 
+        cache_key = self.make_cache_key(lookup, value) 
 
-        cache.set(key, value, self.cache_timeout)
-
+        self.store_reverse_cache(item, cache_key)
         return item
+
+    def store_reverse_cache(self, whitelist, lookup_key):
+        """
+            Given an item, and a ``lookup:value`` key, create
+            a reverse key to allow us to invalid the cache for
+            a given whitelist.
+        """
+        key = self.make_reverse_cache_key(whitelist)
+        items = json.loads(cache.get(key) or "[]")
+        items.append(lookup_key)
+        cache.set(key, json.dumps(items), self.cache_timeout)
+        
+    def clear_cache_for(self, whitelist):
+        """
+            Given a whitelist, lookup all the ``lookup:value``
+            keys that apply to that whitelist. Delete all of those
+            reversed values, as well as the ``reverse_key``.
+        """
+        reverse_key = self.make_reverse_cache_key(whitelist)
+
+        items = json.loads(cache.get(reverse_key) or "[]")
+        cache.delete_many(items + [reverse_key])
+
 
 class Whitelist(models.Model):
     name = models.CharField(max_length=255)
@@ -78,9 +103,16 @@ class Whitelist(models.Model):
         return u'%s' % self.name
 
     def okay(self, ip, validate=netaddr.all_matching_cidrs):
-        ranges = self.ranges[:]
+        """
+            Given an IP address as a string, create a CIDR-style
+            list of all of the ranges that apply to this Whitelist,
+            and make sure that at least one range applies to the IP.
 
-        cidrs = ['%s/%d' % (whitelist_ip, cidr) for whitelist_ip, cidr in ranges]
+            If this whitelist includes *no* ranges (which is almost certainly
+            a user error), return True. Otherwise, return True if at 
+            least one range applied to the given IP.
+        """
+        cidrs = ['%s/%d' % (whitelist_ip, cidr) for whitelist_ip, cidr in self.ranges]
 
         # if there are no associated ranges
         # with this whitelist, *do not fail*.
@@ -89,32 +121,34 @@ class Whitelist(models.Model):
 
         return len(validate(ip, cidrs)) > 0
 
-    def get_ranges(self):
+    def _get_ranges(self):
         return [[ip, cidr] for ip, cidr in self.range_set.values_list('ip', 'cidr')]
 
-    def set_ranges(self, ranges=None):
+    def _set_ranges(self, ranges=None):
         return []
 
-    ranges = property(get_ranges, set_ranges)
+    ranges = property(_get_ranges, _set_ranges)
+
 
 class CachedWhitelist(Whitelist):
     objects = CachedWhitelistManager()
 
     _ranges = None 
 
-    def get_ranges(self):
+    def _get_ranges(self):
         if self._ranges is None:
-            return super(CachedWhitelist, self).get_ranges()
+            return super(CachedWhitelist, self)._get_ranges()
 
         return self._ranges
 
-    def set_ranges(self, ranges=None):
+    def _set_ranges(self, ranges=None):
         self._ranges = ranges
 
-    ranges = property(get_ranges, set_ranges)
+    ranges = property(_get_ranges, _set_ranges)
 
     class Meta:
         proxy = True
+
 
 class Range(models.Model):
     whitelist = models.ForeignKey(Whitelist)

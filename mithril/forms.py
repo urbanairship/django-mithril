@@ -101,6 +101,7 @@ class WhitelistForm(forms.Form):
     def destroy_cache(self, whitelist):
         cwm = CachedWhitelistManager()
 
+        cwm.clear_cache_for(whitelist)
         reverse_key = cwm.make_reverse_cache_key(whitelist)
         reverse_value = cache.get(reverse_key)
 
