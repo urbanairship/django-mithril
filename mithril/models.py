@@ -7,6 +7,34 @@ from django.utils import simplejson as json
 import netaddr
 
 class CachedWhitelistManager(models.Manager):
+    """
+        Interface for the CachedWhitelist.
+
+        Performs cache checks on ``filter``, and provides
+        a mechanism for cache invalidation on a per
+        ``Whitelist`` instance basis.
+
+        The cache structure looks like so::
+
+            * Lookup key: ``lookup:lookup_value`` -> serialized list of
+              matched whitelists.
+
+            * Reverse key: ``whitelist.pk`` -> list of lookup keys
+              that apply to this whitelist.
+
+        Example::
+
+            wl = Whitelist.objects.create(name='lol', slug='lol')
+            wl.range_set.create(ip='1.2.3.4', cidr=32)
+
+            CachedWhitelist.objects.filter(pk=1)
+            # which produces a lookup key: "whitelist:pk:1" that points to
+            # [{"name":"lol", "pk":"1", "slug":"lol", "ranges":[["1.2.3.4", 32]]]
+
+            # and a reverse key: "whitelist:1" that points to
+            # ["whitelist:pk:1"]
+
+    """
     cache_timeout = getattr(settings, 'MITHRIL_CACHE_TIMEOUT', 60 * 30)
 
     def create(self, **kwargs):
@@ -19,6 +47,18 @@ class CachedWhitelistManager(models.Manager):
         return obj
 
     def filter(self, **kwargs):
+        """
+            Override base filter, and when a single lookup / value
+            pair is detected, attempt to load from cache.
+
+            When there's a cache miss, create a lookup key that
+            points to serialized representation of all of the matched
+            whitelists.
+
+            For each of the matched whitelists, generate a reverse lookup
+            key (from Whitelist to a list of lookup keys) and store that
+            in the cache.
+        """
         super_filter = super(CachedWhitelistManager, self).filter
 
         try:
