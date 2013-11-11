@@ -1,7 +1,7 @@
 # (c) 2012 Urban Airship and Contributors
 
 from django.test import TestCase
-from django.conf.urls.defaults import patterns
+from django.conf.urls import patterns
 from django.views.decorators.csrf import csrf_exempt
 from mithril.views import WhitelistEditor
 from mithril.models import Whitelist

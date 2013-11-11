@@ -1,10 +1,10 @@
 # (c) 2012 Urban Airship and Contributors
+import netaddr
+import simplejson
 
 from django.db import models
 from django.conf import settings
 from django.core.cache import cache
-from django.utils import simplejson as json
-import netaddr
 
 class CachedWhitelistManager(models.Manager):
     """
