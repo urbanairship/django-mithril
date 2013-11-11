@@ -1,7 +1,7 @@
 # (c) 2012 Urban Airship and Contributors
 
 from django.test import TestCase
-from django.conf.urls.defaults import patterns
+from django.conf.urls import patterns
 from django.views.decorators.csrf import csrf_exempt
 from mithril.views import WhitelistEditor
 from mithril.models import Whitelist
@@ -28,9 +28,9 @@ class MithrilViewTestCase(TestCase):
     test_settings = {
         'TEMPLATE_LOADERS': ('django.template.loaders.filesystem.Loader',),
         'TEMPLATE_DIRS': (os.path.join(os.path.dirname(__file__), 'templates'),),
-        'TEMPLATE_CONTEXT_PROCESSORS': ('mithril.tests.views.test_context_processor',),
+        'TEMPLATE_CONTEXT_PROCESSORS': ('mithril.tests.test_views.test_context_processor',),
         'MITHRIL_STRATEGY': 'mithril.tests.fake_strategy.FakeStrategy',
-        'ROOT_URLCONF': 'mithril.tests.views',
+        'ROOT_URLCONF': 'mithril.tests.test_views',
     }
 
     def test_view_returns_form_and_whitelist_on_get(self):

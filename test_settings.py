@@ -1,10 +1,11 @@
 # (c) 2012 Urban Airship and Contributors
 
-DATABASES = {'default':{
-    'NAME':'project.db',
-    'ENGINE':'django.db.backends.sqlite3'
-}}
-
+DATABASES = {
+    'default': {
+        'NAME': 'project.db',
+        'ENGINE': 'django.db.backends.sqlite3'
+    }
+}
 # install the bare minimum for
 # testing mithril
 INSTALLED_APPS = (
@@ -20,6 +21,6 @@ ROOT_URLCONF = 'test_settings'
 SECRET_KEY = 'lolwat'
 
 # turn this file into a pseudo-urls.py.
-from django.conf.urls.defaults import *
+from django.conf.urls import patterns
 
 urlpatterns = patterns('')
