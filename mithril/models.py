@@ -1,6 +1,6 @@
 # (c) 2012 Urban Airship and Contributors
 import netaddr
-import simplejson
+import simplejson as json
 
 from django.db import models
 from django.conf import settings
