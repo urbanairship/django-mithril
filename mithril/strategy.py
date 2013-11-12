@@ -1,12 +1,13 @@
 # (c) 2012 Urban Airship and Contributors
 
-from django.http import HttpResponseForbidden 
-from django.utils.functional import curry
+from django.conf import settings
 from django.core.exceptions import FieldError
 from django.core.urlresolvers import NoReverseMatch, reverse
+from django.http import HttpResponseForbidden 
+from django.utils.functional import curry
+
 from mithril.models import Whitelist, CachedWhitelist
 from mithril.signals import user_view_failed, user_login_failed
-import mithril
 
 
 class Strategy(object):
@@ -92,55 +93,20 @@ class Strategy(object):
         if not okay:
             return response_fn()
 
-    @classmethod
-    def get_authentication_backend(
-            cls, base_backend, get_ip=mithril.get_current_ip):
-        class MithrilBackend(base_backend):
-            def authenticate(self, **kwargs):
-                user = super(MithrilBackend, self).authenticate(**kwargs)
-
-                if not cls.partial_credential_lookup:
-                    return user
-
-                for key, lookup in cls.partial_credential_lookup:
-                    val = kwargs.get(key, None)
-                    if val is not None:
-                        whitelists = cls.model.objects.filter(**{lookup:val})
-
-                        # XXX: this is a hack to get the current
-                        # request IP by storing it in a well-known
-                        # location during the ``process_request``
-                        # portion of the middleware cycle.
-                        ip = get_ip()
-
-                        if cls.validate_whitelists(
-                                map(lambda w: w.okay(ip), whitelists)):
-                            return user
-                        else:
-                            # that user shouldn't login!
-                            cls.login_signal.send(
-                                sender=self,
-                                partial_credentials=val,
-                                ip=ip,
-                                whitelists=whitelists,
-                            )
-
-            # NB: Sometimes the cure is worse than the cold.
-            # Django does some pretty "awesome" stuff to try and determine
-            # which auth backend loaded a user. In this case, we only care
-            # about new logins, so we make this generated class masquerade
-            # as the class it's extending.
-            #
-            # That is to say: I am so, so sorry. 
-            @property
-            def __module__(self):
-                return base_backend.__module__
-
-            @property
-            def __class__(self):
-                return base_backend
-
-        return MithrilBackend
 
 class CachedStrategy(Strategy):
     model = CachedWhitelist
+
+
+def get_strategy_from_settings():
+    """ Get the strategy class defined in Django settings
+
+    Relies upon configuration value ``MITHRIL_STRATEGY``.
+
+    """
+    path = settings.MITHRIL_STRATEGY
+    mod = __import__('.'.join(path.split('.')[:-1]))
+    components = path.split('.')
+    for comp in components[1:]:
+        mod = getattr(mod, comp)
+    return mod
