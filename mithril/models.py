@@ -6,6 +6,7 @@ from django.db import models
 from django.conf import settings
 from django.core.cache import cache
 
+
 class CachedWhitelistManager(models.Manager):
     """
         Interface for the CachedWhitelist.
@@ -192,7 +193,7 @@ class CachedWhitelist(Whitelist):
 
 class Range(models.Model):
     whitelist = models.ForeignKey(Whitelist)
-    ip = models.IPAddressField()
+    ip = models.GenericIPAddressField()
     cidr = models.PositiveSmallIntegerField(default=32)
 
     def __unicode__(self):

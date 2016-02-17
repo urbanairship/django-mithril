@@ -2,14 +2,14 @@
 
 from django.conf import settings
 from mithril import set_current_ip
-from django.utils.importlib import import_module
+from importlib import import_module
 
 
 class WhitelistMiddleware(object):
 
     def get_strategy(self, django_settings=settings):
         lhs, rhs = getattr(django_settings, 'MITHRIL_STRATEGY').rsplit('.', 1)
-        return getattr(import_module(lhs), rhs)() 
+        return getattr(import_module(lhs), rhs)()
 
     def process_request(self, request, set_ip=set_current_ip):
         # no matter what, clear the current IP.
@@ -31,4 +31,5 @@ class WhitelistMiddleware(object):
             pass
         else:
             return strategy.process_view(
-                    request, view, *view_args, **view_kwargs)
+                request, view, *view_args, **view_kwargs
+            )
