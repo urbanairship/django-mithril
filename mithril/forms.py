@@ -9,7 +9,7 @@ import netaddr
 
 
 class RangeForm(forms.Form):
-    ip = forms.IPAddressField()
+    ip = forms.GenericIPAddressField()
     cidr = forms.IntegerField(min_value=0, max_value=32)
 
     def clean(self):
