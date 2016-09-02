@@ -1,2 +1,2 @@
-netaddr==0.7.6
+netaddr>=0.7.6
 simplejson>=2.3.0

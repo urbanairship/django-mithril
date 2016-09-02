@@ -1,5 +1,8 @@
 # (c) 2012 Urban Airship and Contributors
 
+import os
+
+
 DATABASES = {
     'default': {
         'NAME': 'project.db',
@@ -20,7 +23,27 @@ ROOT_URLCONF = 'test_settings'
 # set this to turn off an annoying "you're doing it wrong" message
 SECRET_KEY = 'lolwat'
 
-# turn this file into a pseudo-urls.py.
-from django.conf.urls import patterns
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(
+                os.path.dirname(__file__),
+                'mithril',
+                'tests',
+                'templates'
+            )
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {},
+    },
+]
 
-urlpatterns = patterns('')
+# turn this file into a pseudo-urls.py.
+from mithril import utils
+
+if utils.pre_django_1_9():
+    from django.conf.urls import patterns
+    urlpatterns = patterns('')
+else:
+    urlpatterns = []

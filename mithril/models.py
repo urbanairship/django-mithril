@@ -86,10 +86,10 @@ class CachedWhitelistManager(models.Manager):
         else:
             cache_val = json.loads(cache_val)
 
-        return [self.hydrate(item, lookup, value) for item in cache_val] 
+        return [self.hydrate(item, lookup, value) for item in cache_val]
 
     def make_cache_key(self, lookup, value):
-        return 'whitelist:%s:%s' % (lookup, str(value))        
+        return 'whitelist:%s:%s' % (lookup, str(value))
 
     def make_reverse_cache_key(self, item):
         return 'whitelist:%s' % str(item.pk)
@@ -108,7 +108,7 @@ class CachedWhitelistManager(models.Manager):
 
         item.ranges = ranges
 
-        cache_key = self.make_cache_key(lookup, value) 
+        cache_key = self.make_cache_key(lookup, value)
 
         self.store_reverse_cache(item, cache_key)
         return item
@@ -123,7 +123,7 @@ class CachedWhitelistManager(models.Manager):
         items = json.loads(cache.get(key) or "[]")
         items.append(lookup_key)
         cache.set(key, json.dumps(items), self.cache_timeout)
-        
+
     def clear_cache_for(self, whitelist):
         """
             Given a whitelist, lookup all the ``lookup:value``
@@ -150,7 +150,7 @@ class Whitelist(models.Model):
             and make sure that at least one range applies to the IP.
 
             If this whitelist includes *no* ranges (which is almost certainly
-            a user error), return True. Otherwise, return True if at 
+            a user error), return True. Otherwise, return True if at
             least one range applied to the given IP.
         """
         cidrs = ['%s/%d' % (whitelist_ip, cidr) for whitelist_ip, cidr in self.ranges]
@@ -174,7 +174,7 @@ class Whitelist(models.Model):
 class CachedWhitelist(Whitelist):
     objects = CachedWhitelistManager()
 
-    _ranges = None 
+    _ranges = None
 
     def _get_ranges(self):
         if self._ranges is None:

@@ -1,11 +1,12 @@
 # (c) 2012 Urban Airship and Contributors
 
+from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.http import HttpResponseRedirect
 
 from mithril.forms import WhitelistForm
 from mithril.middleware import WhitelistMiddleware
+from mithril.utils import pre_django_1_9
 
 
 class WhitelistEditor(object):
@@ -27,7 +28,7 @@ class WhitelistEditor(object):
             form_kwargs = {'range_form_class': self.range_form_class}
 
         if request.method == 'POST':
-            form_args += (request.POST,) 
+            form_args += (request.POST,)
         form = self.form_class(*form_args, **form_kwargs)
         if form.is_valid():
             self.save_form(request, form, *args, **kwargs)
@@ -39,7 +40,13 @@ class WhitelistEditor(object):
         return form.save()
 
     def respond(self, request, form, whitelist, *args, **kwargs):
-        return render_to_response(self.template, {
-            'form':form,
-            'whitelist':whitelist
-        }, context_instance=RequestContext(request))
+        if pre_django_1_9():
+            return render_to_response(self.template, {
+                'form':form,
+                'whitelist':whitelist
+            }, context_instance=RequestContext(request))
+        else:
+            return render_to_response(self.template, {
+                'form':form,
+                'whitelist':whitelist
+            })
