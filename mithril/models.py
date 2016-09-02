@@ -137,7 +137,7 @@ class CachedWhitelistManager(models.Manager):
 
 
 class Whitelist(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField()
 
     def __unicode__(self):
@@ -193,8 +193,8 @@ class CachedWhitelist(Whitelist):
 
 class Range(models.Model):
     whitelist = models.ForeignKey(Whitelist)
-    ip = models.GenericIPAddressField()
-    cidr = models.PositiveSmallIntegerField(default=32)
+    ip = models.GenericIPAddressField(db_index=True)
+    cidr = models.PositiveSmallIntegerField(default=32, db_index=True)
 
     def __unicode__(self):
         return u'%s/%d' % (self.ip, self.cidr)
