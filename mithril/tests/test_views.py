@@ -75,7 +75,6 @@ class MithrilViewTestCase(TestCase):
 
         with self.settings(**self.test_settings):
             resp = self.client.get('/')
-            import pdb; pdb.set_trace()
             self.assertEqual(resp.context['expected'], Expected)
 
     def test_view_allows_custom_template(self):
